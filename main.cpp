@@ -11,31 +11,33 @@ int main() {
   SetTargetFPS(60);
 
 // initialise vars
+
+   
   Vector2 ballPos{(float)screenWidth * 0.5, (float)screenHeight * 0.5};
+  Vector2 touchPosition{0,0};
+   
   int BALL_SPEED{5};
- 
+  int lastGesture{GESTURE_NONE}; // keeping track of our last Gesture 
+  int currentGesture{GESTURE_NONE}; // for Gesture controll 
+  int gestureCount{0};
+
   constexpr float touchBorderWR{screenWidth - 230.0f};
   constexpr float touchBorderHR{screenHeight - 20.0f};  
   constexpr int touchBorderWL{220};
   constexpr int touchBorderHL{10};
-  float RadiusCircle{30.0f};
-    Rectangle touchArea = { touchBorderWL, touchBorderHL, touchBorderWR, touchBorderHR }; 
-// for movement rectangle 
- 
-  int lastGesture{GESTURE_NONE}; // keeping track of our last Gesture 
-  int currentGesture{GESTURE_NONE}; // for Gesture controll
+  Rectangle touchArea = { touchBorderWL, touchBorderHL, touchBorderWR, touchBorderHR }; 
 
   char gestureString[20][32]{}; // max amount we store
-  int gestureCount{0};
+// for movement rectangle 
+ 
 
-  Vector2 touchPosition{0,0};
  
  while (!WindowShouldClose()) {
-  touchPosition = GetTouchPosition(0); 
 //  Gestures
 
   lastGesture = currentGesture;
   currentGesture = GetGestureDetected(); 
+  touchPosition = GetTouchPosition(0); 
 
 
   if(CheckCollisionPointRec(touchPosition, touchArea) && (currentGesture != GESTURE_NONE)){
@@ -59,8 +61,8 @@ int main() {
         }    
         gestureCount++; 
         // resetting the array
-        if(gestureCount > 20){
-          for(int i{0}; i< 20; i++){
+        if(gestureCount >= 20){
+          for(int i{0}; i < 20; i++){
              strcpy(gestureString[i], "\0");
              gestureCount = 0;
             }
@@ -75,26 +77,19 @@ int main() {
     if(IsKeyDown(KEY_S)) ballPos.y += BALL_SPEED;
  
 
-    int hey = ballPos.x; // so i can draw text to the screen 
-    int hey2 = ballPos.y;
-    // ballPos.y -= BALL_SPEED;
-    // ballPos.x += BALL_SPEED;
-    if((hey2 - RadiusCircle) < touchBorderHL) /*{ballPos.y += 1;}*/  {ballPos.y += 5;}
-    if((hey2 + RadiusCircle) > touchBorderHR + 12) /*{ballPos.y -= 1;}*/ {ballPos.y -= 5;}
-    if((hey - RadiusCircle) < touchBorderWL)  /*{ballPos.x += 1;}*/ {ballPos.x += 5;}
-    if((hey + RadiusCircle) > 790.0f)  /*{ballPos.x -= 1;}*/        {ballPos.x -= 5;}
-    
+    int tpX = touchPosition.x;
+    int tpY = touchPosition.y;
     BeginDrawing();
-    ClearBackground(BEIGE);
+    ClearBackground(DARKGRAY);
 
     DrawRectangleRec(touchArea, GRAY);
-   // DrawRectangle(225, 15, screenWidth - 240, screenHeight - 30, RAYWHITE); // border
+    DrawRectangle(225, 15, screenWidth - 240, screenHeight - 30, DARKGRAY); // border
     
    //  DrawCircleV(touchPosition, RadiusCircle, GOLD); // drawing the circle (with radius 5.5)
-    DrawText(TextFormat("The Y position of the ball is: %03d", hey2), 225,20,20,RED); 
-    DrawText(TextFormat("The X position of the ball is: %03d", hey),  225,40,20,RED);
+    DrawText(TextFormat("The Y position of the ball is: %03d", tpY), 225,20,20,RED); 
+    DrawText(TextFormat("The X position of the ball is: %03d", tpX),  225,40,20,RED);
 
-    for (int i = 0; i < gestureCount; i++)
+    for (int i{0}; i < gestureCount; i++)
       {
           if (i%2 == 0) DrawRectangle(10, 30 + 20*i, 200, 20, Fade(LIGHTGRAY, 0.5f));
           else DrawRectangle(10, 30 + 20*i, 200, 20, Fade(LIGHTGRAY, 0.3f));
